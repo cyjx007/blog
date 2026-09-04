@@ -3,18 +3,23 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle: ''
-description: ''
+title: Tang's Blog
+subtitle: 'Linux · Network · Technology'
+description: '一个记录 Linux、CachyOS、网络和折腾经历的博客'
 keywords:
-author: John Doe
-language: en
-timezone: ''
+  - Linux
+  - CachyOS
+  - Arch Linux
+  - Network
+  - Technology
+author: tanghuang
+language: zh-CN
+timezone: 'Asia/Shanghai'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
-permalink: :year/:month/:day/:title/
+url: https://blog.tanghuang.dpdns.org/
+permalink: posts/:title/
 permalink_defaults:
 pretty_urls:
   trailing_index: true # Set to false to remove trailing 'index.html' from permalinks
