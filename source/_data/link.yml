@@ -1,0 +1,12 @@
+- class_name: 友情链接
+  class_desc: 一些有趣的网站
+  link_list:
+    - name: 0Blog
+      link: https://zil.ing/
+      avatar: https://img.155155155.xyz/i/2024/02/65dc9eb0dc933.webp
+      descr: 梓澪的博客
+
+    - name: 魔皇地狱
+      link: https://blog.mhdy.net/
+      avatar: https://blog.mhdy.net/upload/_.._logo_font20240109_uugai.com-h3956-17047369712104%20(1).png?width=800
+      descr: 魔皇地狱的博客
