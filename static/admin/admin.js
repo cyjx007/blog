@@ -17,7 +17,7 @@ const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft' };
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
-const state = { token: '', imgAuth: '', posts: [], current: null, savedRange: null, timer: null };
+const state = { token: '', imgAuth: '', posts: [], current: null, savedRange: null, timer: null, dirty: false };
 
 /* ── 小工具 ───────────────────────────────────────────── */
 let toastTimer = null;
@@ -213,6 +213,7 @@ function writeDraft() {
 }
 
 function scheduleDraft() {
+  state.dirty = true;
   clearTimeout(state.timer);
   state.timer = setTimeout(writeDraft, 700);
 }
@@ -343,6 +344,7 @@ async function save() {
     state.current.sha = res.content.sha;
     state.current.path = res.content.path;
     state.current.slug = built.slug;
+    state.dirty = false;
     localStorage.removeItem(LS.draft);
     showDraftCard();
     toast(built.draft ? '已存成草稿（不会上线）' : '已提交，一分钟左右上线');
@@ -585,22 +587,15 @@ function boot() {
   });
   window.addEventListener('pagehide', writeDraft);
 
-  $('#btn-resume').addEventListener('click', () => {
-    const d = readDraft();
-    if (!d) return;
-    state.current = {
-      path: d.path || null, sha: d.sha || null, slug: d.slug || '',
-      title: d.title || '', dateIso: '', tags: [], salutation: '', draft: false, markdown: '',
-    };
-    fillEditor(state.current);
-    $('#in-title').value = d.title || '';
-    $('#in-date').value = d.date || toDateInput(localIso(new Date()));
-    $('#in-tags').value = d.tags || '';
-    $('#in-salutation').value = d.salutation || '';
-    $('#in-draft').checked = !!d.draft;
-    editor.innerHTML = d.html || '';
-    $('#save-hint').textContent = '已恢复上次没写完的草稿';
+  /* 有没提交的改动时，关标签/刷新先问一句 */
+  window.addEventListener('beforeunload', (e) => {
+    if (!state.dirty) return;
+    writeDraft();
+    e.preventDefault();
+    e.returnValue = '';
   });
+
+  $('#btn-resume').addEventListener('click', () => resumeDraft(readDraft()));
   $('#btn-drop-draft').addEventListener('click', () => {
     if (!confirm('丢掉这份草稿？')) return;
     localStorage.removeItem(LS.draft);
@@ -612,6 +607,39 @@ function boot() {
   if (!state.token) { show('setup'); return; }
   show('list');
   loadList();
+
+  /* 刷新、误触下拉之后：半小时内的草稿直接接着写，不用再回列表点一次 */
+  setTimeout(() => {
+    const d = readDraft();
+    if (d && d.html && Date.now() - (d.at || 0) < 30 * 60 * 1000) {
+      resumeDraft(d);
+      toast('接着上次没写完的写', 2600);
+    }
+  }, 300);
+}
+
+function resumeDraft(d) {
+  if (!d) return;
+  state.current = {
+    path: d.path || null, sha: d.sha || null, slug: d.slug || '',
+    title: d.title || '', dateIso: '', tags: [], salutation: '', draft: false, markdown: '',
+  };
+  fillEditor(state.current);
+  $('#in-title').value = d.title || '';
+  $('#in-date').value = d.date || toDateInput(localIso(new Date()));
+  $('#in-tags').value = d.tags || '';
+  $('#in-salutation').value = d.salutation || '';
+  $('#in-draft').checked = !!d.draft;
+  editor.innerHTML = d.html || '';
+  state.dirty = false;
+  $('#save-hint').textContent = '已恢复上次没写完的草稿';
 }
 
 boot();
+
+/* 装成 App：写稿台有自己的 manifest（start_url=/admin/），装到桌面就是全屏、没有地址栏 */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

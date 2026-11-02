@@ -1,7 +1,7 @@
 baseURL = 'https://blog.tanghuang.dpdns.org/'
 languageCode = 'zh-CN'
 defaultContentLanguage = 'zh'
-title = "Tang's Blog"
+title = '纸短情长'
 theme = 'epistle'
 timeZone = 'Asia/Shanghai'
 summaryLength = 0
@@ -31,7 +31,7 @@ disablePathToLower = true
 [params]
   author = 'tanghuang'
   description = '一个记录 Linux、CachyOS、网络和折腾经历的博客。写成一封封信。'
-  tagline = 'Linux · 网络 · 折腾'
+  seal = '唐'
   mainSections = ['posts']
   valediction = '此致'
   showSignature = true

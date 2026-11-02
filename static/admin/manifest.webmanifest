@@ -1,0 +1,16 @@
+{
+  "name": "写信的桌子",
+  "short_name": "写信",
+  "description": "纸短情长的写稿台：手机里写完，直接提交到仓库。",
+  "lang": "zh-CN",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#FFFDF8",
+  "theme_color": "#FFFDF8",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

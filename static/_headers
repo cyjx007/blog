@@ -1,3 +1,16 @@
+# 写稿台不进搜索引擎；manifest 要能被浏览器缓存下来，否则装不了 App
+/admin/manifest.webmanifest
+  X-Robots-Tag: noindex, nofollow
+  Content-Type: application/manifest+json
+  Cache-Control: no-cache
+
 /admin/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+
+# service worker 不能被长缓存，否则改了发不出去
+/sw.js
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
