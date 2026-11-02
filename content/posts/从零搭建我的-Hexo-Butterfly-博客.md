@@ -1,11 +1,12 @@
 ---
 title: "从零搭建我的 Hexo + Butterfly 博客"
+date: 2026-09-04T13:53:00+08:00
+draft: true
 slug: "从零搭建我的-Hexo-Butterfly-博客"
-date: 2026-09-04T13:53:22+08:00
-draft: false
-categories: ["开发"]
-tags: ["Hexo", "Butterfly", "GitHub", "Cloudflare"]
+tags: ["Hexo","Butterfly","GitHub","Cloudflare"]
+categories: []
 ---
+
 ## 为什么开始写博客
 
 折腾 Linux、网络和各种软件已经有一段时间了。
