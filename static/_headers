@@ -1,12 +1,16 @@
-# 写稿台不进搜索引擎；manifest 要能被浏览器缓存下来，否则装不了 App
-/admin/manifest.webmanifest
-  X-Robots-Tag: noindex, nofollow
-  Content-Type: application/manifest+json
-  Cache-Control: no-cache
+# Cloudflare Pages 会把所有匹配规则的头「叠加」下发，同名头用逗号拼接，
+# 所以宽规则写前面，特例要用 "! 头名" 先摘掉再重设，否则 no-store 会盖掉 no-cache。
 
+# 写稿台不进搜索引擎，代码永远拿最新的（改了立刻生效，不用清缓存）
 /admin/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
+
+# 但 manifest 要能被浏览器缓存下来，否则装不了 App
+/admin/manifest.webmanifest
+  ! Cache-Control
+  Cache-Control: no-cache
+  Content-Type: application/manifest+json
 
 # service worker 不能被缓存，否则改了发不出去（no-store 不会被 CF 的 Browser Cache TTL 改写）
 /sw.js

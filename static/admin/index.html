@@ -48,6 +48,11 @@
 
     <button class="btn btn-primary" id="btn-connect">连上，开始写</button>
     <p class="error" id="setup-error" hidden></p>
+
+    <div class="setup-foot">
+      <p class="muted small" id="setup-version"></p>
+      <button class="btn btn-small btn-ghost" id="btn-refresh-setup">刷新到最新版本</button>
+    </div>
   </div>
 </section>
 
@@ -55,11 +60,18 @@
 <section class="view" id="view-list" hidden>
   <header class="topbar">
     <div class="topbar-title">写信的桌子</div>
+    <button class="icon-btn" id="btn-refresh" title="刷新到最新版本" aria-label="刷新">↻</button>
     <button class="icon-btn" id="btn-settings" title="设置" aria-label="设置">⚙</button>
   </header>
 
   <div class="list-body">
+    <div class="update-bar" id="update-bar" hidden>
+      <span id="update-text"></span>
+      <button class="btn btn-small btn-primary" id="btn-update">刷新</button>
+    </div>
+
     <button class="btn btn-primary btn-new" id="btn-new">＋ 写一封新的</button>
+
     <div class="draft-card" id="draft-card" hidden>
       <div class="draft-card-main">
         <b id="draft-head">有一封没写完的</b>
@@ -70,13 +82,32 @@
         <button class="btn btn-small btn-ghost" id="btn-drop-draft">丢掉</button>
       </div>
     </div>
-    <p class="muted list-hint" id="list-hint">正在读信匣…</p>
-    <div class="queue-bar" id="queue-bar" hidden>
-      <span id="queue-count">待提交 0 封</span>
-      <button class="btn btn-small btn-primary" id="btn-commit-all">一次提交</button>
-      <button class="btn btn-small btn-ghost" id="btn-clear-queue">清空</button>
+
+    <!-- 待提交：攒几篇一次提交，一次 commit = 一次构建 -->
+    <div class="queue-panel" id="queue-panel" hidden>
+      <div class="queue-head">
+        <button class="queue-summary" id="btn-queue-toggle" aria-expanded="false" aria-controls="queue-list">
+          <span class="queue-dot" aria-hidden="true"></span>
+          <span id="queue-count">待提交 0 封</span>
+          <span class="queue-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="queue-head-acts">
+          <button class="btn btn-small btn-primary" id="btn-commit-all">一次提交</button>
+          <button class="btn btn-small btn-ghost" id="btn-clear-queue">清空</button>
+        </div>
+      </div>
+      <ul class="queue-list" id="queue-list" hidden></ul>
     </div>
-    <input id="list-search" class="search-input" type="search" placeholder="找一封信…" autocomplete="off">
+
+    <input id="list-search" class="search-input" type="search" placeholder="找一封信…（标题、文件名、标签）" autocomplete="off">
+
+    <div class="filter-row" id="filter-row" role="tablist" aria-label="筛选信件">
+      <button class="chip is-on" data-filter="all" role="tab" aria-selected="true">全部</button>
+      <button class="chip" data-filter="queued" role="tab" aria-selected="false">待提交</button>
+      <button class="chip" data-filter="draft" role="tab" aria-selected="false">草稿</button>
+    </div>
+
+    <p class="muted list-hint" id="list-hint">正在读信匣…</p>
     <ul class="post-list" id="post-list"></ul>
   </div>
 </section>
@@ -88,6 +119,14 @@
     <div class="topbar-title" id="editor-status">新的一封</div>
     <button class="btn btn-primary btn-save" id="btn-save">加入待提交</button>
   </header>
+
+  <div class="pending-strip" id="pending-strip" hidden>
+    <span class="pending-strip__text" id="pending-text"></span>
+    <span class="pending-strip__acts">
+      <button class="btn btn-small btn-ghost" id="btn-pending-diff">看改动</button>
+      <button class="btn btn-small btn-ghost" id="btn-pending-drop">撤回</button>
+    </span>
+  </div>
 
   <div class="editor-body">
     <input id="in-title" class="title-input" type="text" placeholder="这封信叫什么" autocomplete="off">
@@ -150,6 +189,33 @@
 </section>
 
 <div class="toast" id="toast" hidden></div>
+
+<!-- ── 确认 / 输入（替掉原生 confirm、prompt） ── -->
+<div class="modal" id="dlg-modal" hidden>
+  <div class="modal-box dlg-box" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <header class="modal-head">
+      <b id="dlg-title">确认一下</b>
+    </header>
+    <p class="dlg-msg" id="dlg-msg"></p>
+    <input class="dlg-input" id="dlg-input" type="text" autocomplete="off" spellcheck="false" hidden>
+    <footer class="modal-foot">
+      <button class="btn btn-small btn-ghost" id="dlg-cancel">取消</button>
+      <button class="btn btn-small btn-primary" id="dlg-ok">确定</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ── 改动对比 ── -->
+<div class="modal" id="diff-modal" hidden>
+  <div class="modal-box diff-box">
+    <header class="modal-head">
+      <b id="diff-title">改动</b>
+      <button class="icon-btn" id="diff-close" aria-label="关闭">✕</button>
+    </header>
+    <p class="muted small modal-hint" id="diff-hint"></p>
+    <div class="diff-body" id="diff-body"></div>
+  </div>
+</div>
 
 <!-- ── Markdown 原文 ── -->
 <div class="modal" id="md-modal" hidden>

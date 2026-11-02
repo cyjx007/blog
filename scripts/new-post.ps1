@@ -27,7 +27,8 @@ $file = Join-Path $dir "$name.md"
 if (Test-Path $file) { Write-Host "已经有一封同名的了：$file" -ForegroundColor Yellow; exit 1 }
 
 $date = Get-Date -Format 'yyyy-MM-ddTHH:mm:sszzz'
-$esc = { param($s) $s.Replace('"', '\"') }
+# YAML 双引号字符串里反斜杠是转义符：标题里的 \ 必须先翻倍，否则 "C:\backup" 会变成退格符
+$esc = { param($s) $s.Replace('\', '\\').Replace('"', '\"') }
 
 $tagLine = '[]'
 if ($Tags) {

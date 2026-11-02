@@ -58,7 +58,19 @@ if ($LASTEXITCODE -ne 0) {
   # 网页写稿台直接提交过，远端会领先：先 rebase 再推
   Write-Host "远端有新的提交（多半是网页写稿台存的），先 rebase 一下…" -ForegroundColor Yellow
   git pull --rebase origin main
-  if ($LASTEXITCODE -eq 0) { git push origin main }
+  if ($LASTEXITCODE -ne 0) {
+    # 真在 rebase 里才回滚；如果只是拉取失败（凭据/网络），别乱动工作区，交给下面的兜底脚本
+    $rebaseMerge = git rev-parse --git-path rebase-merge
+    $rebaseApply = git rev-parse --git-path rebase-apply
+    if ((Test-Path $rebaseMerge) -or (Test-Path $rebaseApply)) {
+      git rebase --abort 2>$null | Out-Null
+      Write-Host "rebase 冲突，已经回滚到提交前。手动解决之后再发一次。" -ForegroundColor Red
+      exit 1
+    }
+    Write-Host "拉取远端失败（多半是凭据或网络），试试兜底脚本…" -ForegroundColor Yellow
+  } else {
+    git push origin main
+  }
 }
 if ($LASTEXITCODE -ne 0) {
   # 沙箱/无凭据环境下的兜底：走工作区的 token 包装脚本
@@ -66,6 +78,9 @@ if ($LASTEXITCODE -ne 0) {
   if (Test-Path $wrap) { & $wrap push origin main }
   if ($LASTEXITCODE -ne 0) { Write-Host "推送失败，检查 GitHub 凭据或有没有冲突。" -ForegroundColor Red; exit 1 }
 }
+
+# rebase 会改写 commit：等部署前必须重新取一次 HEAD，否则 commit_hash 永远对不上、白等 5 分钟
+$sha = (git rev-parse --short HEAD)
 
 if ($NoWatch) { Write-Host "已推送。" -ForegroundColor Green; exit 0 }
 
