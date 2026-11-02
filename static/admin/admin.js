@@ -13,7 +13,7 @@ const CFG = {
   siteBase: 'https://blog.tanghuang.dpdns.org/posts/',
 };
 
-const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft' };
+const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta: 'desk.meta' };
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
@@ -161,20 +161,91 @@ async function loadList() {
       .sort((a, b) => a.name.localeCompare(b.name, 'zh'));
     hint.hidden = true;
     renderList();
+    enrichMeta();   /* 标题/日期/草稿标记：后台补，不挡列表 */
   } catch (e) {
     hint.textContent = e.message;
   }
 }
 
+/* ── 标题缓存：按文件 sha 存，没变过的文件不重复拉 ── */
+function readMetaCache() {
+  try { return JSON.parse(localStorage.getItem(LS.meta) || '{}'); } catch (e) { return {}; }
+}
+function writeMetaCache(c) {
+  try { localStorage.setItem(LS.meta, JSON.stringify(c)); } catch (e) {}
+}
+
+async function enrichMeta() {
+  const cache = readMetaCache();
+  const todo = state.posts.filter((i) => !cache[i.path] || cache[i.path].sha !== i.sha).slice(0, 40);
+  let dirty = false;
+  for (const item of todo) {
+    try {
+      const data = await gh(`/contents/${encodeURI(item.path)}?ref=${CFG.branch}`);
+      const { fm } = parseFront(fromB64(data.content));
+      cache[item.path] = {
+        sha: item.sha,
+        title: fm.title || '',
+        date: fm.date || '',
+        draft: String(fm.draft).toLowerCase() === 'true',
+      };
+      dirty = true;
+      renderList();
+    } catch (e) { /* 单个失败就保持文件名 */ }
+  }
+  if (dirty) writeMetaCache(cache);
+}
+
 function renderList() {
   const ul = $('#post-list');
+  const cache = readMetaCache();
+  const q = ($('#list-search').value || '').trim().toLowerCase();
   ul.innerHTML = '';
-  state.posts.forEach((item) => {
+
+  const rows = state.posts.map((item) => {
+    const m = cache[item.path] || {};
+    const title = m.title || item.name.replace(/\.md$/, '').replace(/-/g, ' ');
+    const date = (m.date || '').slice(0, 10);
+    return { item, title, date, draft: !!m.draft };
+  }).filter((r) => !q || r.title.toLowerCase().includes(q) || r.item.name.toLowerCase().includes(q));
+
+  /* 有日期的按日期新→旧，没日期的排后面按标题 */
+  rows.sort((a, b) => {
+    if (a.date && b.date && a.date !== b.date) return b.date.localeCompare(a.date);
+    if (a.date && !b.date) return -1;
+    if (!a.date && b.date) return 1;
+    return a.title.localeCompare(b.title, 'zh');
+  });
+
+  if (!rows.length) {
+    const li = document.createElement('li');
+    li.className = 'list-empty';
+    li.textContent = q ? '没有匹配的信' : '还没有信';
+    ul.appendChild(li);
+    return;
+  }
+
+  rows.forEach((r) => {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = '#';
-    a.textContent = item.name.replace(/\.md$/, '').replace(/-/g, ' ');
-    a.addEventListener('click', (ev) => { ev.preventDefault(); openPost(item); });
+    const t = document.createElement('span');
+    t.className = 't';
+    t.textContent = r.title;
+    a.appendChild(t);
+    if (r.draft) {
+      const b = document.createElement('span');
+      b.className = 'badge';
+      b.textContent = '草稿';
+      a.appendChild(b);
+    }
+    if (r.date) {
+      const d = document.createElement('span');
+      d.className = 'd';
+      d.textContent = r.date;
+      a.appendChild(d);
+    }
+    a.addEventListener('click', (ev) => { ev.preventDefault(); openPost(r.item); });
     li.appendChild(a);
     ul.appendChild(li);
   });
@@ -721,6 +792,22 @@ function boot() {
     const { md } = buildMarkdown();
     $('#md-text').value = md;
     $('#md-modal').hidden = false;
+  });
+
+  $('#list-search').addEventListener('input', renderList);
+
+  $('#btn-preview').addEventListener('click', () => {
+    const { md, title } = buildMarkdown();
+    const { body } = splitFrontMatter(md);
+    $('#pv-title').textContent = title || '预览';
+    $('#pv-body').innerHTML = sanitizeHtml(marked.parse(body));
+    $('#pv-modal').hidden = false;
+    $('#pv-body').scrollTop = 0;
+  });
+  $('#pv-close').addEventListener('click', () => { $('#pv-modal').hidden = true; });
+  $('#pv-modal').addEventListener('click', (ev) => { if (ev.target.id === 'pv-modal') $('#pv-modal').hidden = true; });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !$('#pv-modal').hidden) $('#pv-modal').hidden = true;
   });
   const closeMd = () => { $('#md-modal').hidden = true; };
   ['#md-close', '#md-close2'].forEach((s) => $(s).addEventListener('click', closeMd));
