@@ -17,7 +17,8 @@ const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
-const state = { token: '', imgAuth: '', posts: [], current: null, savedRange: null, timer: null, dirty: false };
+const state = { token: '', imgAuth: '', posts: [], current: null, savedRange: null, timer: null, dirty: false, listLimit: 20 };
+const LIST_PAGE = 20;
 
 /* ── 小工具 ───────────────────────────────────────────── */
 let toastTimer = null;
@@ -160,6 +161,7 @@ async function loadList() {
       .filter((i) => i.type === 'file' && i.name.endsWith('.md') && !i.name.startsWith('_'))
       .sort((a, b) => a.name.localeCompare(b.name, 'zh'));
     hint.hidden = true;
+    state.listLimit = LIST_PAGE;
     renderList();
     enrichMeta();   /* 标题/日期/草稿标记：后台补，不挡列表 */
   } catch (e) {
@@ -225,7 +227,7 @@ function renderList() {
     return;
   }
 
-  rows.forEach((r) => {
+  rows.slice(0, state.listLimit).forEach((r) => {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = '#';
@@ -249,6 +251,21 @@ function renderList() {
     li.appendChild(a);
     ul.appendChild(li);
   });
+
+  /* 分页：一次 20 封，点「加载更多」再加 20 */
+  if (rows.length > state.listLimit) {
+    const li = document.createElement('li');
+    li.className = 'list-more';
+    const b = document.createElement('button');
+    b.className = 'btn btn-small btn-ghost';
+    b.textContent = `还有 ${rows.length - state.listLimit} 封，加载更多`;
+    b.addEventListener('click', () => {
+      state.listLimit += LIST_PAGE;
+      renderList();
+    });
+    li.appendChild(b);
+    ul.appendChild(li);
+  }
 }
 
 /* ── 草稿（本机） ─────────────────────────────────────── */
@@ -794,7 +811,10 @@ function boot() {
     $('#md-modal').hidden = false;
   });
 
-  $('#list-search').addEventListener('input', renderList);
+  $('#list-search').addEventListener('input', () => {
+    state.listLimit = LIST_PAGE;
+    renderList();
+  });
 
   $('#btn-preview').addEventListener('click', () => {
     const { md, title } = buildMarkdown();
