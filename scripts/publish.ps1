@@ -55,10 +55,16 @@ Write-Host ""
 Write-Host "提交 $sha，推送中…" -ForegroundColor DarkGray
 git push origin main
 if ($LASTEXITCODE -ne 0) {
+  # 网页写稿台直接提交过，远端会领先：先 rebase 再推
+  Write-Host "远端有新的提交（多半是网页写稿台存的），先 rebase 一下…" -ForegroundColor Yellow
+  git pull --rebase origin main
+  if ($LASTEXITCODE -eq 0) { git push origin main }
+}
+if ($LASTEXITCODE -ne 0) {
   # 沙箱/无凭据环境下的兜底：走工作区的 token 包装脚本
   $wrap = '..\.dsh\github\gh-git.cmd'
   if (Test-Path $wrap) { & $wrap push origin main }
-  if ($LASTEXITCODE -ne 0) { Write-Host "推送失败，检查 GitHub 凭据。" -ForegroundColor Red; exit 1 }
+  if ($LASTEXITCODE -ne 0) { Write-Host "推送失败，检查 GitHub 凭据或有没有冲突。" -ForegroundColor Red; exit 1 }
 }
 
 if ($NoWatch) { Write-Host "已推送。" -ForegroundColor Green; exit 0 }
