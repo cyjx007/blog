@@ -396,7 +396,7 @@ function fillEditor(post) {
   $('#in-pin').checked = !!post.pin;
   $('#slug-line').textContent = post.slug ? `地址：${CFG.siteBase}${post.slug}/` : '地址按标题自动生成';
   $('#btn-delete').hidden = !post.sha;
-  $('#editor-status').textContent = post.sha ? '改一封旧信' : '新的一封';
+  $('#editor-status').textContent = (post.sha ? '改一封旧信' : '新的一封') + (post.draft ? '（前台不显示）' : '');
   $('#save-hint').textContent = '';
   editor.innerHTML = post.markdown ? marked.parse(post.markdown) : '';
   state.initialHtml = editor.innerHTML;
@@ -523,7 +523,7 @@ async function save() {
     toast(built.draft ? '已存成草稿（不会上线）' : '已提交，一分钟左右上线');
     $('#save-hint').textContent = `上次提交：${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
     $('#btn-delete').hidden = false;
-    $('#editor-status').textContent = '改一封旧信';
+    $('#editor-status').textContent = built.draft ? '改一封旧信（前台不显示）' : '改一封旧信';
   } catch (e) {
     toast(e.message, 4200);
   } finally {
@@ -948,5 +948,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
+
 
 
