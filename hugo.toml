@@ -31,7 +31,7 @@ disablePathToLower = true
 [params]
   author = 'tanghuang'
   description = '一个记录 Linux、CachyOS、网络和折腾经历的博客。写成一封封信。'
-  seal = '唐'
+  seal = 'Tang'
   mainSections = ['posts']
   valediction = '此致'
   showSignature = true
