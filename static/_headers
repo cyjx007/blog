@@ -8,9 +8,9 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
 
-# service worker 不能被长缓存，否则改了发不出去
+# service worker 不能被缓存，否则改了发不出去（no-store 不会被 CF 的 Browser Cache TTL 改写）
 /sw.js
-  Cache-Control: no-cache
+  Cache-Control: no-store
 
 /manifest.webmanifest
   Content-Type: application/manifest+json
