@@ -291,6 +291,7 @@ function writeDraft() {
     tags: $('#in-tags').value,
     salutation: $('#in-salutation').value,
     draft: $('#in-draft').checked,
+    pin: $('#in-pin').checked,
     html: editor.innerHTML,
     path: state.current.path,
     sha: state.current.sha,
@@ -338,6 +339,7 @@ function applyMeta(meta) {
   }
   if (meta.salutation && !$('#in-salutation').value) { $('#in-salutation').value = meta.salutation; n++; }
   if (meta.draft === 'true' && !$('#in-draft').checked) { $('#in-draft').checked = true; n++; }
+  if (meta.pin === 'true' && !$('#in-pin').checked) { $('#in-pin').checked = true; n++; }
   return n;
 }
 
@@ -391,6 +393,7 @@ function fillEditor(post) {
   $('#in-tags').value = (post.tags || []).join(', ');
   $('#in-salutation').value = post.salutation || '';
   $('#in-draft').checked = !!post.draft;
+  $('#in-pin').checked = !!post.pin;
   $('#slug-line').textContent = post.slug ? `地址：${CFG.siteBase}${post.slug}/` : '地址按标题自动生成';
   $('#btn-delete').hidden = !post.sha;
   $('#editor-status').textContent = post.sha ? '改一封旧信' : '新的一封';
@@ -405,7 +408,7 @@ function fillEditor(post) {
 function newPost() {
   state.current = {
     path: null, sha: null, slug: '', title: '', dateIso: localIso(new Date()),
-    tags: [], salutation: '', draft: false, markdown: '',
+    tags: [], salutation: '', draft: false, pin: false, markdown: '',
   };
   fillEditor(state.current);
 }
@@ -425,6 +428,7 @@ async function openPost(item) {
       tags: tagsFromYaml(fm.tags),
       salutation: fm.salutation || '',
       draft: fm.draft === 'true',
+      pin: String(fm.pin).toLowerCase() === 'true',
       markdown: body,
     };
     fillEditor(state.current);
@@ -459,6 +463,7 @@ function buildMarkdown() {
   const tags = parseTags($('#in-tags').value);
   const salutation = $('#in-salutation').value.trim();
   const draft = $('#in-draft').checked;
+  const pin = $('#in-pin').checked;
   const slug = state.current.slug || slugify(title);
 
   // 正文没动过就原样保留（避免 Markdown → HTML → Markdown 把老文章重排）
@@ -472,8 +477,9 @@ function buildMarkdown() {
 
   const lines = ['---', `title: "${esc(title)}"`, `date: ${dateIso}`, `draft: ${draft}`, `slug: "${esc(slug)}"`];
   if (salutation) lines.push(`salutation: "${esc(salutation)}"`);
+  if (pin) lines.push('pin: true');
   lines.push(`tags: ${JSON.stringify(tags)}`, 'categories: []', '---', '');
-  return { md: lines.join('\n') + '\n' + body + '\n', title, slug, tags, dateIso, draft };
+  return { md: lines.join('\n') + '\n' + body + '\n', title, slug, tags, dateIso, draft, pin };
 }
 
 async function save() {
@@ -859,6 +865,7 @@ function boot() {
     $(s).addEventListener('input', scheduleDraft);
   });
   $('#in-draft').addEventListener('change', scheduleDraft);
+  $('#in-pin').addEventListener('change', scheduleDraft);
   $('#in-title').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); editor.focus(); }
   });
@@ -893,6 +900,7 @@ function boot() {
     $('#in-tags').value = '';
     $('#in-salutation').value = '';
     $('#in-draft').checked = false;
+    $('#in-pin').checked = false;
     $('#save-hint').textContent = '';
     showDraftCard();
     toast('草稿已丢掉', 2200);
@@ -918,7 +926,7 @@ function resumeDraft(d) {
   if (!d) return;
   state.current = {
     path: d.path || null, sha: d.sha || null, slug: d.slug || '',
-    title: d.title || '', dateIso: '', tags: [], salutation: '', draft: false, markdown: '',
+    title: d.title || '', dateIso: '', tags: [], salutation: '', draft: false, pin: !!d.pin, markdown: '',
   };
   fillEditor(state.current);
   $('#in-title').value = d.title || '';
@@ -926,6 +934,7 @@ function resumeDraft(d) {
   $('#in-tags').value = d.tags || '';
   $('#in-salutation').value = d.salutation || '';
   $('#in-draft').checked = !!d.draft;
+  $('#in-pin').checked = !!d.pin;
   editor.innerHTML = d.html || '';
   state.dirty = false;
   $('#save-hint').textContent = '已恢复上次没写完的草稿';
@@ -939,3 +948,5 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
+
