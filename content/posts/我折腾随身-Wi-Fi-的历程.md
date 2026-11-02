@@ -1,11 +1,12 @@
 ---
 title: "我折腾随身 Wi-Fi 的历程"
+date: 2026-09-04T14:42:00+08:00
+draft: true
 slug: "我折腾随身-Wi-Fi-的历程"
-date: 2026-09-04T14:42:52+08:00
-draft: false
-categories: ["折腾"]
-tags: ["随身 Wi-Fi", "OpenWrt", "Mihomo", "OpenList", "网络"]
+tags: ["随身 Wi-Fi","OpenWrt","Mihomo","OpenList","网络"]
+categories: []
 ---
+
 ## 起点
 
 一开始，我只是想让一个随身 Wi-Fi 发挥它本来的作用。
