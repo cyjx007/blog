@@ -64,7 +64,7 @@ body { display: flex; flex-direction: column; }
 .btn:active { transform: scale(0.98); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn-ghost { background: transparent; }
-.btn-small { font-size: 14px; padding: 0.45rem 0.8rem; min-height: 38px; }
+.btn-small { font-size: 14px; padding: 0.45rem 0.8rem; min-height: 44px; }
 .btn:disabled { opacity: 0.55; }
 
 .icon-btn {
@@ -195,7 +195,7 @@ body { display: flex; flex-direction: column; }
 .meta-item-grow { flex: 1; min-width: 8rem; }
 .meta input {
   font: inherit;
-  font-size: 15px;
+  font-size: 16px; /* 和 .field input 一样：低于 16px 时 iOS 聚焦会自动放大页面 */
   padding: 0.45rem 0.5rem;
   border: 1px solid var(--line);
   border-radius: 6px;

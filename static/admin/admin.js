@@ -316,15 +316,29 @@ async function save() {
   const btn = $('#btn-save');
   btn.disabled = true;
   btn.textContent = '提交中…';
+  const path = state.current.path || `${CFG.dir}/${built.slug}.md`;
+  const body = {
+    message: `${state.current.sha ? 'edit' : 'post'}: ${built.title}`,
+    content: toB64(built.md),
+    branch: CFG.branch,
+  };
+  if (state.current.sha) body.sha = state.current.sha;
   try {
-    const path = state.current.path || `${CFG.dir}/${built.slug}.md`;
-    const body = {
-      message: `${state.current.sha ? 'edit' : 'post'}: ${built.title}`,
-      content: toB64(built.md),
-      branch: CFG.branch,
-    };
-    if (state.current.sha) body.sha = state.current.sha;
-    const res = await gh(`/contents/${encodeURI(path)}`, { method: 'PUT', body: JSON.stringify(body) });
+    let res;
+    try {
+      res = await gh(`/contents/${encodeURI(path)}`, { method: 'PUT', body: JSON.stringify(body) });
+    } catch (e) {
+      if (!/GitHub 409/.test(e.message)) throw e;
+      /* 远端被改过（多半是刚从电脑上发过一封）：问一句再覆盖，别让人白写 */
+      let cur = null;
+      try { cur = await gh(`/contents/${encodeURI(path)}`); } catch (e2) { cur = null; }
+      if (!cur || !cur.sha) throw e;
+      if (!confirm('这封在别处改过了（远端版本更新）。用你现在写的覆盖它吗？')) {
+        throw new Error('没覆盖。先把正文复制出来，再刷新重写。');
+      }
+      body.sha = cur.sha;
+      res = await gh(`/contents/${encodeURI(path)}`, { method: 'PUT', body: JSON.stringify(body) });
+    }
 
     state.current.sha = res.content.sha;
     state.current.path = res.content.path;
@@ -427,12 +441,36 @@ async function pickImage() {
   $('#file-input').click();
 }
 
+/* 手机照片动辄 5 MB：先缩到长边 1600 再传，快、也省图床 */
+function fmtKB(n) { return n >= 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB'; }
+
+async function shrinkImage(file) {
+  if (/^image\/(gif|svg)/.test(file.type)) return file;          /* 动图/矢量不动 */
+  if (file.size < 400 * 1024) return file;                       /* 小图不折腾 */
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch (e) { return file; }  /* HEIC 之类解不开就原样传 */
+  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * scale));
+  const h = Math.max(1, Math.round(bmp.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+  const png = /png$/.test(file.type);                            /* PNG 保持 PNG，别把透明转成黑底 */
+  const blob = await new Promise((r) => canvas.toBlob(r, png ? 'image/png' : 'image/jpeg', 0.85));
+  if (!blob || blob.size >= file.size * 0.9) return file;
+  const name = (file.name || 'image').replace(/\.[^.]+$/, '') + (png ? '.png' : '.jpg');
+  return new File([blob], name, { type: png ? 'image/png' : 'image/jpeg' });
+}
+
 async function handleFile(file) {
   if (!file) return;
   if (!/^image\//.test(file.type)) { toast('只支持图片'); return; }
-  toast('上传中…', 2000);
+  toast('处理中…', 1500);
   try {
-    const url = await uploadImage(file);
+    const small = await shrinkImage(file);
+    if (small !== file) toast(`压缩 ${fmtKB(file.size)} → ${fmtKB(small.size)}`, 2000);
+    const url = await uploadImage(small);
     insertHtml(`<img src="${url}" alt="${(file.name || 'image').replace(/"/g, '')}">`);
     toast('图片已插进来');
   } catch (e) {
