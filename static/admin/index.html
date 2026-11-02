@@ -71,6 +71,11 @@
       </div>
     </div>
     <p class="muted list-hint" id="list-hint">正在读信匣…</p>
+    <div class="queue-bar" id="queue-bar" hidden>
+      <span id="queue-count">待提交 0 封</span>
+      <button class="btn btn-small btn-primary" id="btn-commit-all">一次提交</button>
+      <button class="btn btn-small btn-ghost" id="btn-clear-queue">清空</button>
+    </div>
     <input id="list-search" class="search-input" type="search" placeholder="找一封信…" autocomplete="off">
     <ul class="post-list" id="post-list"></ul>
   </div>
@@ -118,6 +123,7 @@
 
     <div class="editor-foot">
       <button class="btn btn-small btn-ghost" id="btn-preview">预览</button>
+      <button class="btn btn-small btn-ghost" id="btn-queue">加入待提交</button>
       <button class="btn btn-small btn-ghost" id="btn-source">看 Markdown 原文</button>
       <button class="btn btn-small btn-ghost" id="btn-import">导入 .md 文件</button>
       <button class="btn btn-small btn-ghost" id="btn-delete" hidden>删除这封</button>

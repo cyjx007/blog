@@ -13,7 +13,7 @@ const CFG = {
   siteBase: 'https://blog.tanghuang.dpdns.org/posts/',
 };
 
-const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta: 'desk.meta' };
+const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta: 'desk.meta', queue: 'desk.queue' };
 
 const $ = (s) => document.querySelector(s);
 const editor = $('#editor');
@@ -99,6 +99,7 @@ async function gh(pathname, opts = {}) {
       Authorization: `Bearer ${state.token}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
+      ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
       ...(opts.headers || {}),
     },
   });
@@ -265,6 +266,85 @@ function renderList() {
     });
     li.appendChild(b);
     ul.appendChild(li);
+  }
+}
+
+/* ── 待提交队列：攒几篇改动，一次 commit = 一次构建 ── */
+function readQueue() {
+  try { return JSON.parse(localStorage.getItem(LS.queue) || '[]'); } catch (e) { return []; }
+}
+
+function writeQueue(q) {
+  try { localStorage.setItem(LS.queue, JSON.stringify(q)); } catch (e) {}
+  renderQueueBar();
+}
+
+function renderQueueBar() {
+  const bar = $('#queue-bar');
+  if (!bar) return;
+  const q = readQueue();
+  if (!q.length) { bar.hidden = true; return; }
+  $('#queue-count').textContent = `待提交 ${q.length} 封`;
+  bar.hidden = false;
+}
+
+function queueCurrent() {
+  const built = buildMarkdown();
+  if (!built.title) { toast('先给这封信起个名字'); $('#in-title').focus(); return; }
+  const path = state.current.path || `${CFG.dir}/${built.slug}.md`;
+  const q = readQueue().filter((i) => i.path !== path);
+  q.push({ path, title: built.title, md: built.md, at: Date.now() });
+  writeQueue(q);
+  clearTimeout(state.timer);
+  localStorage.removeItem(LS.draft);
+  state.dirty = false;
+  showDraftCard();
+  toast(`已加入待提交（共 ${q.length} 封）`, 2400);
+}
+
+async function commitQueue() {
+  const q = readQueue();
+  if (!q.length) return;
+  if (!confirm(`一次提交 ${q.length} 封？只会触发一次构建。`)) return;
+  const btn = $('#btn-commit-all');
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  try {
+    const ref = await gh(`/git/ref/heads/${CFG.branch}`);
+    const baseSha = ref.object.sha;
+    const baseCommit = await gh(`/git/commits/${baseSha}`);
+    const treeItems = [];
+    for (const item of q) {
+      const blob = await gh('/git/blobs', {
+        method: 'POST',
+        body: JSON.stringify({ content: item.md, encoding: 'utf-8' }),
+      });
+      treeItems.push({ path: item.path, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+    const tree = await gh('/git/trees', {
+      method: 'POST',
+      body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: treeItems }),
+    });
+    const msg = q.length === 1
+      ? `post: ${q[0].title}`
+      : `post: ${q.length} 封（${q.map((i) => i.title).join('、').slice(0, 50)}）`;
+    const commit = await gh('/git/commits', {
+      method: 'POST',
+      body: JSON.stringify({ message: msg, tree: tree.sha, parents: [baseSha] }),
+    });
+    await gh(`/git/refs/heads/${CFG.branch}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ sha: commit.sha }),
+    });
+    writeQueue([]);
+    toast('已提交，一分钟左右上线', 3000);
+    loadList();
+  } catch (e) {
+    toast('提交失败：' + e.message, 5000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
   }
 }
 
@@ -822,6 +902,12 @@ function boot() {
     renderList();
   });
 
+  $('#btn-queue').addEventListener('click', queueCurrent);
+  $('#btn-commit-all').addEventListener('click', commitQueue);
+  $('#btn-clear-queue').addEventListener('click', () => {
+    if (confirm('清空待提交？这些改动还没进仓库。')) writeQueue([]);
+  });
+
   $('#btn-preview').addEventListener('click', () => {
     const { md, title } = buildMarkdown();
     const { body } = splitFrontMatter(md);
@@ -948,6 +1034,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
 
 
 
