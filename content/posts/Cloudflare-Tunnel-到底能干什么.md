@@ -1,11 +1,12 @@
 ---
 title: "Cloudflare Tunnel 到底能干什么"
+date: 2026-09-04T15:55:00+08:00
+draft: true
 slug: "Cloudflare-Tunnel-到底能干什么"
-date: 2026-09-04T15:55:44+08:00
-draft: false
-categories: ["网络"]
-tags: ["Cloudflare", "Tunnel", "IPv4", "IPv6", "网络"]
+tags: ["Cloudflare","Tunnel","IPv4","IPv6","网络"]
+categories: []
 ---
+
 ## 我为什么开始研究 Cloudflare Tunnel
 
 之前折腾自己的随身 Wi-Fi 网络时，我遇到了一个很现实的问题。
