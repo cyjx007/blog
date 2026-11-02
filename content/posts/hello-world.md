@@ -1,7 +1,7 @@
 ---
 title: "这封信是怎么写出来的"
 date: 2026-09-04T00:00:00+08:00
-draft: false
+draft: true
 slug: "hello-world"
 salutation: "见字如面，"
 tags: ["Hugo","写作"]
