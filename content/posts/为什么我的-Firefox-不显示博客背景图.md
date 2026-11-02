@@ -1,11 +1,12 @@
 ---
 title: "为什么我的 Firefox 不显示博客背景图"
+date: 2026-09-04T14:19:00+08:00
+draft: true
 slug: "为什么我的-Firefox-不显示博客背景图"
-date: 2026-09-04T14:19:51+08:00
-draft: false
-categories: ["折腾"]
-tags: ["Firefox", "Hexo", "Butterfly", "CSS"]
+tags: ["Firefox","Hexo","Butterfly","CSS"]
+categories: []
 ---
+
 ## 问题
 
 最近给自己的 Hexo + Butterfly 博客加了一张背景图片。
