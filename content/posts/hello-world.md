@@ -1,12 +1,11 @@
 ---
 title: "这封信是怎么写出来的"
-slug: "hello-world"
 date: 2026-09-04T00:00:00+08:00
 draft: false
-categories: ["关于本站"]
-tags: ["Hugo", "写作"]
+slug: "hello-world"
 salutation: "见字如面，"
-postscript: "这封信的源码就在 content/posts/hello-world.md，想改样式照着它抄就行。"
+tags: ["Hugo","写作"]
+categories: []
 ---
 
 这封信不是正文，是一张样张——你在这页上看到的每一种排版，都是 Markdown 里几行字。
@@ -38,7 +37,7 @@ postscript: "这封信的源码就在 content/posts/hello-world.md，想改样�
 ## 引用
 
 > 从前的日色变得慢，车、马、邮件都慢。
->
+> 
 > ——木心
 
 引用会缩进一道细竖线，颜色比正文淡一点，像抄在页边的话。
