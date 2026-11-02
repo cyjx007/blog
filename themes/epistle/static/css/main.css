@@ -683,11 +683,11 @@ body[data-dappled="off"] .dappled-layer { display: none; }
 /* ── 6. 代码与表格 ───────────────────────────────────────── */
 .letter-body code {
   font-family: var(--font-mono);
-  font-size: 0.86em;
-  padding: 0.12em 0.34em;
+  font-size: 0.85em;
+  padding: 0.08em 0.26em;
   border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-  color: color-mix(in srgb, var(--ink) 92%, var(--accent));
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: color-mix(in srgb, var(--ink) 86%, var(--accent));
 }
 
 .letter-body pre,

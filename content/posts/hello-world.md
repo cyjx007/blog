@@ -1,43 +1,50 @@
 ---
-title: "Hello World"
+title: "这封信是怎么写出来的"
 slug: "hello-world"
 date: 2026-09-04T00:00:00+08:00
 draft: false
-categories: ["Hexo"]
-tags: ["Hexo", "教程"]
+categories: ["关于本站"]
+tags: ["Hugo", "写作"]
+salutation: "见字如面，"
+postscript: "这封信的源码就在 content/posts/hello-world.md，想改样式照着它抄就行。"
 ---
-Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 
-### Quick Start
+这封信不是正文，是一张样张——你在这页上看到的每一种排版，都是 Markdown 里几行字。
 
-#### Create a new post
+## 一封信由什么组成
 
-``` bash
-$ hexo new "My New Post"
+除了正文，一封信还有几样固定的东西，都写在文件开头的 front matter 里：
+
+- **称谓**：`salutation`，就是开头那句「见字如面，」
+- **祝颂语**：全站统一，在 `hugo.toml` 里设成「此致」
+- **签名**：主题里那条手写笔迹，跟着墨色一起变淡
+- **日期**：取 `date`，也就是落款那天
+
+正文里的小标题用两个井号。像上面这个「一封信由什么组成」，就是 `## 一封信由什么组成`。
+
+## 代码和列表
+
+行内代码长这样：`hugo server --port 1313`。
+
+整段代码会包在信纸里，带边框、不抢戏：
+
+```toml
+[params]
+  valediction = '此致'
+  ageSpanYears = 6      # 多少年之后纸黄到最旧
+  ageCurve = 0.45       # 曲线越小平时的信越早泛黄
 ```
 
-More info: [Writing](https://hexo.io/docs/writing.html)
+## 引用
 
-#### Run server
+> 从前的日色变得慢，车、马、邮件都慢。
+>
+> ——木心
 
-``` bash
-$ hexo server
-```
+引用会缩进一道细竖线，颜色比正文淡一点，像抄在页边的话。
 
-More info: [Server](https://hexo.io/docs/server.html)
+## 最后
 
-#### Generate static files
+这封信不到六百字，所以纸上没有折痕；长信会自动叠三折，读到哪一折，哪一折的印子就松开。
 
-``` bash
-$ hexo generate
-```
-
-More info: [Generating](https://hexo.io/docs/generating.html)
-
-#### Deploy to remote sites
-
-``` bash
-$ hexo deploy
-```
-
-More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)
+纸的颜色和墨的深浅也不用管，它们按写信的年份自己算——你今天写的信是白的，三年后再来看，它就黄了一点。

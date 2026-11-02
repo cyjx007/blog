@@ -14,17 +14,36 @@ content/
   posts/          每篇文章 = 一封信（含 _index.md 作为「信匣」页）
   about.md        关于
   links.md        友情链接
+scripts/          写稿 / 发布 / 预览 的脚本
+写新信.cmd        双击 → 输入标题 → 记事本打开
+发布.cmd          双击 → 构建检查 → 提交 → 推送 → 等上线
+预览.cmd          双击 → 本地 http://127.0.0.1:1313
 themes/epistle/   主题（从 fork 同步，勿直接改）
 hugo.toml         站点配置
 ```
 
-## 写一封新信
+## 写一封信（最简单的方式）
 
-```bash
-hugo new posts/2026-11-02-某件事.md
+**双击 `写新信.cmd`**，输入标题，回车。脚本会：
+
+1. 在 `content/posts/` 生成 `标题.md`，front matter 都填好（日期、slug、草稿状态）
+2. 告诉你上线后的地址
+3. 用记事本打开它
+
+写完存盘，再**双击 `发布.cmd`**：先本地构建一遍（YAML 写错会拦住），然后提交、推送，
+最后盯着 Cloudflare 部署，成功了会把网址打出来。
+
+想在本地先看效果就双击 `预览.cmd`。
+
+### 也可以敲命令
+
+```powershell
+.\scripts\new-post.ps1 "标题" -Tags "Linux,Hugo" -Salutation "见字如面，"
+.\scripts\publish.ps1
+.\scripts\preview.ps1
 ```
 
-Front matter：
+Front matter 长这样（`new-post.ps1` 自动生成）：
 
 ```yaml
 ---
@@ -41,11 +60,11 @@ categories: ["折腾"]
 
 超过 600 字会自动叠三折；纸色墨色按 `date` 自动算，不用管。
 
-## 本地预览
+### 不装任何东西：在浏览器里写
 
-```bash
-hugo server --port 1313
-```
+打开 <https://github.com/cyjx007/blog/new/main/content/posts>，文件名写 `标题.md`，
+把上面的 front matter 粘进去，提交（Commit changes）。Cloudflare 会自己构建。
+适合改错字、补一句话这种小修改。
 
 ## 构建
 
