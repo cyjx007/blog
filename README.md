@@ -14,6 +14,7 @@ content/
   posts/          每篇文章 = 一封信（含 _index.md 作为「信匣」页）
   about.md        关于
   links.md        友情链接
+static/admin/     网页写稿台（手机可用，见下）
 scripts/          写稿 / 发布 / 预览 的脚本
 写新信.cmd        双击 → 输入标题 → 记事本打开
 发布.cmd          双击 → 构建检查 → 提交 → 推送 → 等上线
@@ -21,6 +22,27 @@ scripts/          写稿 / 发布 / 预览 的脚本
 themes/epistle/   主题（从 fork 同步，勿直接改）
 hugo.toml         站点配置
 ```
+
+## 网页写稿台（手机上写）
+
+打开 <https://blog.tanghuang.dpdns.org/admin/>，第一次只填两样东西：
+
+1. **GitHub 令牌** —— 建议建一个 fine-grained token，只勾 `blog` 这一个仓库的
+   `Contents: Read and write`：[新建 token](https://github.com/settings/personal-access-tokens/new)
+2. **图床口令** —— 已经默认填好（`img.tanghuang.dpdns.org`）
+
+两样都存在**这台设备的 localStorage** 里，不会进仓库、不会上传到别处。
+
+能做什么：
+
+- 像用 Word 一样写，工具栏有「大标题 / 小标题 / 粗 / 斜 / 列表 / 编号 / 引用 / 代码 / 链接 / 图片 / 分隔」
+- 图片直接上传到图床 `img.tanghuang.dpdns.org`，插入的是图床地址，不占仓库
+- 每 700ms 自动把草稿存到本机，刷新、切后台、iOS 把标签页杀了都不会丢；重开会有「继续上次没写完的」
+- 保存 = 直接提交到 GitHub，大约一分钟上线；不会自动刷新页面
+- 打开旧文章时，正文没动过就原样保留（不会把 Markdown 重排）
+
+安全边界：页面本身是公开的，但没有令牌的人进去只能看到登录页；令牌只存在你自己的浏览器里。
+想换设备就重新填一次，想注销就点右上角齿轮换个令牌。
 
 ## 写一封信（最简单的方式）
 
