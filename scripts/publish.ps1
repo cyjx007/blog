@@ -10,11 +10,11 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-$status = git status --porcelain
+$status = git -c core.quotepath=false status --porcelain
 if (-not $status) { Write-Host "没有改动，不用发。" -ForegroundColor Yellow; exit 0 }
 
 Write-Host "这次要发的东西：" -ForegroundColor Cyan
-git status --short | ForEach-Object { Write-Host "  $_" }
+git -c core.quotepath=false status --short | ForEach-Object { Write-Host "  $_" }
 
 # 草稿提醒：draft: true 不会出现在站上
 $drafts = Select-String -Path 'content\posts\*.md' -Pattern '^draft:\s*true' -List -ErrorAction SilentlyContinue
@@ -32,6 +32,7 @@ if (-not $NoBuild) {
   elseif (Test-Path '..\.tools\hugo\hugo.exe') { $hugo = (Resolve-Path '..\.tools\hugo\hugo.exe').Path }
   if ($hugo) {
     Write-Host ""
+    if (-not $env:HUGO_CACHEDIR) { $env:HUGO_CACHEDIR = Join-Path $root '.hugo-cache' }
     Write-Host "本地构建检查…" -ForegroundColor DarkGray
     & $hugo --gc --minify --cleanDestinationDir --logLevel warn
     if ($LASTEXITCODE -ne 0) {

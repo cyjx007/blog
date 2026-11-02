@@ -15,5 +15,6 @@ if (-not $hugo) {
   exit 1
 }
 
+if (-not $env:HUGO_CACHEDIR) { $env:HUGO_CACHEDIR = Join-Path $root '.hugo-cache' }
 Write-Host "预览地址：http://127.0.0.1:$Port/   （Ctrl+C 停止）" -ForegroundColor Green
 & $hugo server --port $Port --bind 127.0.0.1 --buildDrafts
