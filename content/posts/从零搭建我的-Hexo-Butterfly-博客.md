@@ -1,7 +1,7 @@
 ---
 title: "从零搭建我的 Hexo + Butterfly 博客"
 date: 2026-09-04T13:53:00+08:00
-draft: false
+draft: true
 slug: "从零搭建我的-Hexo-Butterfly-博客"
 tags: ["Hexo","Butterfly","GitHub","Cloudflare"]
 categories: []
