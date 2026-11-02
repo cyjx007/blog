@@ -218,6 +218,82 @@ function scheduleDraft() {
   state.timer = setTimeout(writeDraft, 700);
 }
 
+/* ── 粘 Markdown / 导入 .md：认 front matter，认标题和空行 ── */
+function splitFrontMatter(text) {
+  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(text || '');
+  if (!m) return { meta: null, body: text || '' };
+  const meta = {};
+  m[1].split(/\r?\n/).forEach((line) => {
+    const kv = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
+    if (!kv) return;
+    let v = kv[2].trim();
+    if (/^".*"$/.test(v) || /^'.*'$/.test(v)) v = v.slice(1, -1);
+    meta[kv[1].toLowerCase()] = v;
+  });
+  return { meta, body: text.slice(m[0].length) };
+}
+
+function applyMeta(meta) {
+  if (!meta) return 0;
+  let n = 0;
+  if (meta.title && !$('#in-title').value) { $('#in-title').value = meta.title; n++; }
+  if (meta.date) {
+    const d = toDateInput(meta.date);
+    if (d && !$('#in-date').value) { $('#in-date').value = d; n++; }
+  }
+  if (meta.tags) {
+    const tags = meta.tags.replace(/^\[|\]$/g, '').split(',')
+      .map((s) => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+    if (tags.length && !$('#in-tags').value) { $('#in-tags').value = tags.join(', '); n++; }
+  }
+  if (meta.salutation && !$('#in-salutation').value) { $('#in-salutation').value = meta.salutation; n++; }
+  if (meta.draft === 'true' && !$('#in-draft').checked) { $('#in-draft').checked = true; n++; }
+  return n;
+}
+
+function looksLikeMarkdown(s) {
+  return /^#{1,6}\s/m.test(s) || /^\s*[-*+]\s+/m.test(s) || /^\s*\d+\.\s+/m.test(s) ||
+    /^\s*>\s/m.test(s) || /```/.test(s) || /\*\*[^*]+\*\*/.test(s);
+}
+
+function textToHtml(text) {
+  return String(text).split(/\r?\n\s*\r?\n/).map((para) => {
+    const esc = para.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<p>' + esc.replace(/\r?\n/g, '<br>') + '</p>';
+  }).join('');
+}
+
+/* 一段文本 → 编辑器 HTML：像 Markdown 就渲染，否则按空行分段 */
+function textToEditorHtml(text) {
+  return looksLikeMarkdown(text) ? sanitizeHtml(marked.parse(text)) : textToHtml(text);
+}
+
+/* 贴进来的 HTML（包括 marked 渲染结果）都过一遍：去掉脚本和内联事件 */
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('script,style,iframe,meta,link,object,embed').forEach((n) => n.remove());
+  doc.querySelectorAll('*').forEach((n) => {
+    Array.from(n.attributes).forEach((a) => {
+      if (/^on/i.test(a.name)) n.removeAttribute(a.name);
+      else if ((a.name === 'href' || a.name === 'src') && /^javascript:/i.test(a.value)) n.removeAttribute(a.name);
+    });
+  });
+  return doc.body.innerHTML;
+}
+
+function importMarkdownFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const { meta, body } = splitFrontMatter(String(reader.result || ''));
+    const filled = applyMeta(meta);
+    editor.innerHTML = textToEditorHtml(body);
+    state.dirty = true;
+    scheduleDraft();
+    toast(filled ? `导入完成，顺手填了 ${filled} 个字段` : '导入完成', 3000);
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
 /* ── 编辑器 ───────────────────────────────────────────── */
 function fillEditor(post) {
   $('#in-title').value = post.title || '';
@@ -518,24 +594,32 @@ function bindToolbar() {
   });
 
   editor.addEventListener('paste', (ev) => {
-    const files = ev.clipboardData && ev.clipboardData.files;
+    const cd = ev.clipboardData;
+    if (!cd) return;
+
+    const files = cd.files;
     if (files && files.length && /^image\//.test(files[0].type)) {
       ev.preventDefault();
       handleFile(files[0]);
       return;
     }
-    const html = ev.clipboardData && ev.clipboardData.getData('text/html');
+
+    const html = cd.getData('text/html');
     if (html) {
       ev.preventDefault();
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      doc.querySelectorAll('script,style,iframe,meta,link,object,embed').forEach((n) => n.remove());
-      doc.querySelectorAll('*').forEach((n) => {
-        Array.from(n.attributes).forEach((a) => {
-          if (/^on/i.test(a.name) || (a.name === 'href' && /^javascript:/i.test(a.value))) n.removeAttribute(a.name);
-        });
-      });
-      document.execCommand('insertHTML', false, doc.body.innerHTML);
+      document.execCommand('insertHTML', false, sanitizeHtml(html));
+      return;
     }
+
+    /* 纯文本：多半是从编辑器里整篇粘过来的 Markdown。
+       先把 front matter 拆出来填表单，剩下的按 Markdown 渲染——不然会挤成一大段。 */
+    const text = cd.getData('text/plain');
+    if (!text) return;
+    ev.preventDefault();
+    const { meta, body } = splitFrontMatter(text);
+    const filled = applyMeta(meta);
+    insertHtml(textToEditorHtml(body));
+    if (filled) toast(`认出了 ${filled} 个字段（标题/日期/标签…）`, 2600);
   });
 }
 
@@ -562,11 +646,32 @@ function boot() {
   $('#btn-delete').addEventListener('click', removePost);
   $('#btn-source').addEventListener('click', () => {
     const { md } = buildMarkdown();
-    const box = prompt('Markdown 原文（只读，想改就直接改正文）', md);
-    if (box && box !== md) {
-      const back = turndownService.turndown(marked.parse(box));
-      editor.innerHTML = marked.parse(back);
+    $('#md-text').value = md;
+    $('#md-modal').hidden = false;
+  });
+  const closeMd = () => { $('#md-modal').hidden = true; };
+  ['#md-close', '#md-close2'].forEach((s) => $(s).addEventListener('click', closeMd));
+  $('#md-modal').addEventListener('click', (ev) => { if (ev.target.id === 'md-modal') closeMd(); });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !$('#md-modal').hidden) closeMd();
+  });
+  $('#md-copy').addEventListener('click', async () => {
+    const text = $('#md-text').value;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      $('#md-text').select();
+      document.execCommand('copy');
     }
+    toast('已复制');
+  });
+  $('#btn-import').addEventListener('click', () => {
+    $('#md-input').value = '';
+    $('#md-input').click();
+  });
+  $('#md-input').addEventListener('change', (ev) => {
+    const f = ev.target.files && ev.target.files[0];
+    if (f) importMarkdownFile(f);
   });
 
   editor.addEventListener('input', scheduleDraft);

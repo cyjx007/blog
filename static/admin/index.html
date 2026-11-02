@@ -113,6 +113,7 @@
 
     <div class="editor-foot">
       <button class="btn btn-small btn-ghost" id="btn-source">看 Markdown 原文</button>
+      <button class="btn btn-small btn-ghost" id="btn-import">导入 .md 文件</button>
       <button class="btn btn-small btn-ghost" id="btn-delete" hidden>删除这封</button>
     </div>
     <p class="muted small" id="save-hint"></p>
@@ -137,6 +138,24 @@
 </section>
 
 <div class="toast" id="toast" hidden></div>
+
+<!-- ── Markdown 原文 ── -->
+<div class="modal" id="md-modal" hidden>
+  <div class="modal-box">
+    <header class="modal-head">
+      <b>Markdown 原文</b>
+      <button class="icon-btn" id="md-close" aria-label="关闭">✕</button>
+    </header>
+    <p class="muted small modal-hint">只读预览。要改就直接改正文，改完这里会跟着变。</p>
+    <textarea id="md-text" spellcheck="false" readonly></textarea>
+    <footer class="modal-foot">
+      <button class="btn btn-small" id="md-copy">复制</button>
+      <button class="btn btn-small btn-primary" id="md-close2">知道了</button>
+    </footer>
+  </div>
+</div>
+
+<input type="file" id="md-input" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden>
 
 <script src="vendor/marked.min.js"></script>
 <script src="vendor/turndown.js"></script>

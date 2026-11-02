@@ -305,6 +305,61 @@ body { display: flex; flex-direction: column; }
 }
 .toast[hidden] { display: none; }
 
+/* ── Markdown 原文弹层 ── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(20, 16, 12, 0.55);
+}
+.modal[hidden] { display: none; }
+.modal-box {
+  display: flex;
+  flex-direction: column;
+  width: min(44rem, 100%);
+  max-height: min(80vh, 42rem);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+.modal-hint { margin: 0; padding: 0.5rem 0.9rem 0; }
+#md-text {
+  flex: 1;
+  min-height: 12rem;
+  margin: 0.6rem 0.9rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-dim);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  resize: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0 0.9rem 0.9rem;
+}
+
 @media (min-width: 720px) {
   .editor-body { padding-top: 1.5rem; }
   .toolbar { justify-content: center; }
