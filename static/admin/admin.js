@@ -173,7 +173,7 @@ function renderList() {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = '#';
-    a.textContent = item.name.replace(/\.md$/, '');
+    a.textContent = item.name.replace(/\.md$/, '').replace(/-/g, ' ');
     a.addEventListener('click', (ev) => { ev.preventDefault(); openPost(item); });
     li.appendChild(a);
     ul.appendChild(li);
@@ -189,12 +189,14 @@ function showDraftCard() {
   const d = readDraft();
   const card = $('#draft-card');
   if (!d || !d.html) { card.hidden = true; return; }
+  /* 改的是旧信就说「改过没提交」，别说成「没写完的新信」 */
+  $('#draft-head').textContent = d.sha ? '这封改过，还没提交' : '有一封没写完的';
   $('#draft-title').textContent = d.title || '（没标题）';
   card.hidden = false;
 }
 
 function writeDraft() {
-  if (!state.current) return;
+  if (!state.current || !state.dirty) return;
   const d = {
     title: $('#in-title').value,
     date: $('#in-date').value,
@@ -307,6 +309,7 @@ function fillEditor(post) {
   $('#save-hint').textContent = '';
   editor.innerHTML = post.markdown ? marked.parse(post.markdown) : '';
   state.initialHtml = editor.innerHTML;
+  state.dirty = false;   /* 刚打开还没改：别立刻写草稿 */
   show('editor');
   if (!post.title) $('#in-title').focus();
 }
