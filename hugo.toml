@@ -1,0 +1,60 @@
+baseURL = 'https://blog.tanghuang.dpdns.org/'
+languageCode = 'zh-CN'
+defaultContentLanguage = 'zh'
+title = "Tang's Blog"
+theme = 'epistle'
+timeZone = 'Asia/Shanghai'
+summaryLength = 0
+hasCJKLanguage = true
+enableRobotsTXT = true
+disablePathToLower = true
+
+# 保持旧站（Hexo permalink: posts/:name/）的 URL 不变
+[permalinks]
+  posts = '/posts/:slug/'
+
+[pagination]
+  pagerSize = 20
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.goldmark.parser.attribute]
+  block = true
+  title = true
+
+[markup.highlight]
+  noClasses = false
+  lineNos = false
+  tabWidth = 2
+
+[params]
+  author = 'tanghuang'
+  description = '一个记录 Linux、CachyOS、网络和折腾经历的博客。写成一封封信。'
+  tagline = 'Linux · 网络 · 折腾'
+  mainSections = ['posts']
+  valediction = '此致'
+  showSignature = true
+  signatureName = 'Tang'
+  dappledLight = true
+  # 信纸老化：多少年到达"最旧"（约 6 年），以及曲线陡度
+  ageSpanYears = 6
+  ageCurve = 0.45
+  [params.letter]
+    salutationDefault = ''
+  [params.guestbook]
+    enabled = false
+
+[menu]
+  [[menu.main]]
+    name = '信匣'
+    url = '/posts/'
+    weight = 10
+  [[menu.main]]
+    name = '关于'
+    url = '/about/'
+    weight = 20
+  [[menu.main]]
+    name = '友链'
+    url = '/links/'
+    weight = 30

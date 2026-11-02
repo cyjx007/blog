@@ -1,0 +1,43 @@
+{{ define "main" }}
+{{- if .IsHome -}}
+  {{- $pages := where .Site.RegularPages "Section" "posts" -}}
+  {{- with index $pages.ByDate.Reverse 0 -}}
+    {{- partial "folds.html" . -}}
+    {{- partial "letter.html" . -}}
+    {{- $rest := sub (len $pages) 1 -}}
+    {{- if gt $rest 0 -}}
+    <div class="home-more">
+      <span>匣中还压着 {{ $rest }} 封旧信</span>
+      <a href="{{ "/posts/" | relURL }}">打开信匣 →</a>
+    </div>
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- $pages := .Pages -}}
+  {{- $title := .Title -}}
+  {{- if eq .Kind "section" }}{{ $title = (.Title | default "信匣") }}{{ end -}}
+<section class="archive-page">
+  <header class="archive-page__head">
+    <h1 class="archive-page__title">{{ $title }}</h1>
+    <p class="archive-page__sub">共 {{ len $pages }} 封</p>
+  </header>
+  {{ range $pages.ByDate.Reverse.GroupByDate "2006" }}
+  <div class="year-block">
+    <h2 class="year-block__year">{{ .Key }}</h2>
+    <ul class="letter-list">
+      {{ range .Pages }}
+      <li class="letter-list__item">
+        <a href="{{ .RelPermalink }}">
+          <time class="letter-list__date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "01-02" }}</time>
+          <span class="letter-list__title">{{ .Title }}</span>
+          <span class="letter-list__leader" aria-hidden="true"></span>
+          <span class="letter-list__meta">{{ .WordCount }} 字</span>
+        </a>
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+  {{ end }}
+</section>
+{{- end -}}
+{{ end }}
