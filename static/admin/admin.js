@@ -299,7 +299,10 @@ function queueCurrent() {
   localStorage.removeItem(LS.draft);
   state.dirty = false;
   showDraftCard();
-  toast(`已加入待提交（共 ${q.length} 封）`, 2400);
+  /* 回列表，让人一眼看到「待提交 N 封」，接着改下一篇 */
+  show('list');
+  renderQueueBar();
+  toast(`已加入待提交（共 ${q.length} 封），攒够了点「一次提交」`, 3200);
 }
 
 async function commitQueue() {
@@ -567,7 +570,7 @@ async function save() {
   const built = buildMarkdown();
   if (!built.title) { toast('先给这封信起个名字'); $('#in-title').focus(); return; }
 
-  const btn = $('#btn-save');
+  const btn = $('#btn-publish');
   btn.disabled = true;
   btn.textContent = '提交中…';
   const path = state.current.path || `${CFG.dir}/${built.slug}.md`;
@@ -608,7 +611,7 @@ async function save() {
     toast(e.message, 4200);
   } finally {
     btn.disabled = false;
-    btn.textContent = '保存';
+    btn.textContent = '立即发布';
   }
 }
 
@@ -889,7 +892,8 @@ function boot() {
     if (state.token) loadList();
     showDraftCard();
   });
-  $('#btn-save').addEventListener('click', save);
+  $('#btn-save').addEventListener('click', queueCurrent);
+  $('#btn-publish').addEventListener('click', save);
   $('#btn-delete').addEventListener('click', removePost);
   $('#btn-source').addEventListener('click', () => {
     const { md } = buildMarkdown();
@@ -902,7 +906,6 @@ function boot() {
     renderList();
   });
 
-  $('#btn-queue').addEventListener('click', queueCurrent);
   $('#btn-commit-all').addEventListener('click', commitQueue);
   $('#btn-clear-queue').addEventListener('click', () => {
     if (confirm('清空待提交？这些改动还没进仓库。')) writeQueue([]);
@@ -1034,6 +1037,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
 
 
 
