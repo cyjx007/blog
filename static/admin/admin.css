@@ -286,6 +286,12 @@ body { display: flex; flex-direction: column; }
   cursor: pointer;
 }
 .toolbar button:active { background: var(--accent-soft); color: var(--accent); }
+/* 光标所在段落是什么格式，对应的按钮就亮着 */
+.toolbar button.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 38%, transparent);
+}
 
 /* ── 提示条 ── */
 .toast {

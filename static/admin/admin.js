@@ -593,10 +593,80 @@ function bindToolbar() {
     handleFile(ev.target.files[0]);
   });
 
+  bindMarkdownInput();
+  bindPaste();
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === editor) syncFormatButtons();
+  });
+  editor.addEventListener('keyup', syncFormatButtons);
+  editor.addEventListener('mouseup', syncFormatButtons);
+  editor.addEventListener('focus', syncFormatButtons);
+}
+
+/* ── 敲 "## " 变标题、"- " 变列表、"> " 变引用…… ── */
+function bindMarkdownInput() {
+  editor.addEventListener('beforeinput', (ev) => {
+    if (ev.inputType !== 'insertText' || ev.data !== ' ') return;
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const node = sel.anchorNode;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+
+    const before = node.textContent.slice(0, sel.anchorOffset);
+    const m = /^(#{1,3}|[-*+]|1\.|>|```)$/.exec(before);
+    if (!m) return;
+    ev.preventDefault();
+
+    /* 去掉行首记号，光标回到块首，再套上对应的块格式 */
+    node.textContent = node.textContent.slice(sel.anchorOffset);
+    const r = document.createRange();
+    r.setStart(node, 0);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+
+    const mark = m[1];
+    if (mark[0] === '#') block(mark.length >= 3 ? 'h3' : 'h2');
+    else if (mark === '>' ) block('blockquote');
+    else if (mark === '```') insertCode();
+    else if (mark === '1.') document.execCommand('insertOrderedList');
+    else document.execCommand('insertUnorderedList');
+    syncFormatButtons();
+  });
+}
+
+/* ── 光标在哪，工具栏就亮哪个 ── */
+function syncFormatButtons() {
+  const btns = Array.from(document.querySelectorAll('#toolbar button[data-cmd]'));
+  if (!btns.length) return;
+
+  const set = (cmd, on) => {
+    const b = btns.find((x) => x.dataset.cmd === cmd);
+    if (b) b.classList.toggle('is-active', !!on);
+  };
+
+  const inEditor = editor.contains(window.getSelection() ? window.getSelection().anchorNode : null);
+  if (!inEditor) { btns.forEach((b) => b.classList.remove('is-active')); return; }
+
+  let tag = '';
+  try { tag = String(document.queryCommandValue('formatBlock') || '').toLowerCase(); } catch (e) {}
+  const is = (c) => { try { return document.queryCommandState(c); } catch (e) { return false; } };
+
+  set('h2', tag === 'h2');
+  set('h3', tag === 'h3' || tag === 'h4');
+  set('quote', tag === 'blockquote');
+  set('code', tag === 'pre');
+  set('p', !tag || tag === 'p' || tag === 'div');
+  set('bold', is('bold'));
+  set('italic', is('italic'));
+  set('ul', is('insertUnorderedList'));
+  set('ol', is('insertOrderedList'));
+}
+
+function bindPaste() {
   editor.addEventListener('paste', (ev) => {
     const cd = ev.clipboardData;
     if (!cd) return;
-
     const files = cd.files;
     if (files && files.length && /^image\//.test(files[0].type)) {
       ev.preventDefault();
@@ -703,8 +773,19 @@ function boot() {
   $('#btn-resume').addEventListener('click', () => resumeDraft(readDraft()));
   $('#btn-drop-draft').addEventListener('click', () => {
     if (!confirm('丢掉这份草稿？')) return;
+    clearTimeout(state.timer);
     localStorage.removeItem(LS.draft);
+    /* 光删 localStorage 不够：编辑器里还有内容，pagehide / 输入又会把它写回去 */
+    state.current = null;
+    state.dirty = false;
+    editor.innerHTML = '';
+    $('#in-title').value = '';
+    $('#in-tags').value = '';
+    $('#in-salutation').value = '';
+    $('#in-draft').checked = false;
+    $('#save-hint').textContent = '';
     showDraftCard();
+    toast('草稿已丢掉', 2200);
   });
 
   showDraftCard();
