@@ -1,11 +1,12 @@
 ---
 title: "我的 CachyOS + Niri + Noctalia 桌面环境折腾记录"
+date: 2026-09-04T16:20:00+08:00
+draft: true
 slug: "我的-CachyOS-Niri-桌面环境折腾记录"
-date: 2026-09-04T16:20:18+08:00
-draft: false
-categories: ["Linux"]
-tags: ["CachyOS", "Niri", "Noctalia", "Wayland", "Linux桌面"]
+tags: ["CachyOS","Niri","Noctalia","Wayland","Linux桌面"]
+categories: []
 ---
+
 ## 为什么又开始折腾 Linux 桌面
 
 Linux 最大的乐趣之一，大概就是：
