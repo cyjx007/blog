@@ -530,7 +530,12 @@ function renderQueuePanel() {
   const panel = $('#queue-panel');
   if (!panel) return;
   const q = state.queue;
-  if (!q.length) { panel.hidden = true; state.queueOpen = false; return; }
+  if (!q.length) {
+    panel.hidden = true;
+    state.queueOpen = false;
+    $('#queue-count').textContent = '待提交 0 封';
+    return;
+  }
   panel.hidden = false;
 
   const edits = q.filter((i) => i.baseSha).length;
