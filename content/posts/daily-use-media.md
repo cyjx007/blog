@@ -55,8 +55,41 @@ shell.mpris.blacklist = [ "playerctld" ];
 
 只影响显示，真播放器照常工作。
 
-> 顺带记一句：Firefox 也走 MPRIS，但它的播放状态不回传（`PlaybackStatus` 一直是 `Stopped`），
-> 所以顶栏媒体控件对 Firefox 无效。这不是配置能修的，是 Firefox 的实现如此。
+### 顶栏控制 Firefox：为什么时好时坏
+
+写这篇的时候我以为结论是「Firefox 走 MPRIS 但状态不回传，所以卡片对它无效」。后来又折腾了一轮，发现**不是无效，是三个毛病叠在一起**：
+
+| 现象 | 根因 |
+| --- | --- |
+| 进度条不动、永远是 0 | 一旦 seek，`Position` 恒返回 0，直到暂停再播放 |
+| 卡片按下去毫无反应 | Firefox 重启后 MPRIS 名字变了，卡片还在往旧名字发命令 |
+| 图标和文案不更新 | 不发 `PropertiesChanged`，`PlaybackStatus` 恒为 `"Playing"` |
+
+第一个能当场演示：
+
+```bash
+N=org.mpris.MediaPlayer2.firefox.instance_1_1558
+busctl --user get-property $N /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player Position
+# 2273000000（37 分 53 秒）
+busctl --user call $N /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player Seek x 5000000
+busctl --user get-property $N /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player Position
+# 0 —— 音频还在播，位置却不动了
+```
+
+这是 [Bug 2065930](https://bugzilla.mozilla.org/show_bug.cgi?id=2065930)，状态 ASSIGNED、补丁在 review。**拖过进度条之后按一下暂停再播放**，位置就恢复了。
+
+第二个是我亲眼撞上的：Firefox 每次启动，MPRIS 名字都换一个（`instance_1_545` → `instance_1_1558`），对着旧名字发命令直接返回 `The name is not activatable`。所以重启浏览器之后立刻就能控制——不是玄学，是新会话被重新选中了。
+
+第三个是纯体验问题：命令**确实发出去了**，只是没有回执。你在网页里暂停，卡片还显示暂停键；你按卡片，图标不变，你以为没生效，再按一次反而又播了。
+
+恢复顺序，从轻到重：
+
+1. 网页里按一下空格（重建媒体会话）
+2. 让 Noctalia 丢掉缓存的偏好：`busctl --user call dev.noctalia.Mpris /dev/noctalia/Mpris dev.noctalia.Mpris ClearActivePlayerPreference`
+3. 媒体页手动切一次播放器
+4. 重启 Firefox（最彻底）
+
+还会再坏的情形：拖进度条、片头广告、开画中画、长时间暂停。所以看视频我还是更愿意 `mpv 'URL'`——它的 MPRIS 双向都正常。
 
 ## 二、视频：mpv 的三层
 
