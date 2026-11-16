@@ -1,0 +1,70 @@
+name: Deploy Hugo site to GitHub Pages
+
+# 为什么有两套部署：
+#   1. Cloudflare Pages（项目名 blog，域名 blog-efv.pages.dev）—— push 自动构建，原有的那套，保留
+#   2. GitHub Pages（域名 blog.tanghuang.dpdns.org）—— 这个 workflow
+# 原因：tanghuang.dpdns.org 被 Cloudflare 以 ToS 为由封禁（域名级，不是 zone 级），
+#       Cloudflare 的 Pages 拒绝绑定该域名，所以对外域名改由 GitHub Pages（Fastly）提供服务。
+# 两边都是 push 即触发，内容自动同步，不需要手工同步。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  HUGO_VERSION: 0.147.7
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Hugo (extended)
+        run: |
+          wget -q -O "${{ runner.temp }}/hugo.deb" \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
+          sudo dpkg -i "${{ runner.temp }}/hugo.deb"
+          hugo version
+
+      - name: Build
+        env:
+          HUGO_CACHEDIR: ${{ runner.temp }}/hugo_cache
+          HUGO_ENVIRONMENT: production
+        run: hugo --gc --minify --cleanDestinationDir --logLevel warn
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

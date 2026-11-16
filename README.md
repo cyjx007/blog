@@ -2,7 +2,8 @@
 
 一个写在信纸上的技术博客：Linux、CachyOS、网络与折腾。
 
-- 站点：<https://blog-efv.pages.dev/>（原域名 `blog.tanghuang.dpdns.org` 的 DNS 记录已被删，临时回到 Pages 默认域）
+- 站点：<https://blog.tanghuang.dpdns.org/>（GitHub Pages，快照域 <https://blog-efv.pages.dev/>）
+- 双部署：push `main` 同时触发 **GitHub Actions → GitHub Pages**（对外域名）和 **Cloudflare Pages 项目 `blog`**（`blog-efv.pages.dev` 镜像）
 - 生成器：Hugo（0.147.x）
 - 主题：[`cyjx007/hugo-theme-epistle`](https://github.com/cyjx007/hugo-theme-epistle)（`themes/epistle/` 是它的同步副本）
 - 托管：Cloudflare Pages（`main` 分支推送即构建）
@@ -25,7 +26,7 @@ hugo.toml         站点配置
 
 ## 网页写稿台（手机上写）
 
-打开 <https://blog-efv.pages.dev/admin/>，第一次只填两样东西：
+打开 <https://blog.tanghuang.dpdns.org/admin/>，第一次只填两样东西：
 
 1. **GitHub 令牌** —— 建议建一个 fine-grained token，只勾 `blog` 这一个仓库的
    `Contents: Read and write`：[新建 token](https://github.com/settings/personal-access-tokens/new)

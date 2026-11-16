@@ -7,7 +7,7 @@
 
 /* 改了这个文件就把 BUILD 往后挪一位：页面会拿它跟线上的比，
    发现线上更新了就顶一条「有新版本」，点一下就能刷新（手机上没有 Ctrl+R）。 */
-const BUILD = '2026-11-16.1';
+const BUILD = '2026-11-16.2';
 
 const CFG = {
   owner: 'cyjx007',
@@ -15,7 +15,7 @@ const CFG = {
   branch: 'main',
   dir: 'content/posts',
   imgEndpoint: 'https://cloudflare-imgbed-auw.pages.dev/upload',
-  siteBase: 'https://blog-efv.pages.dev/posts/',
+  siteBase: 'https://blog.tanghuang.dpdns.org/posts/',
 };
 
 const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta: 'desk.meta', queue: 'desk.queue' };
