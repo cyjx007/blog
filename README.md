@@ -2,7 +2,7 @@
 
 一个写在信纸上的技术博客：Linux、CachyOS、网络与折腾。
 
-- 站点：<https://blog.tanghuang.dpdns.org/>
+- 站点：<https://blog-efv.pages.dev/>（原域名 `blog.tanghuang.dpdns.org` 的 DNS 记录已被删，临时回到 Pages 默认域）
 - 生成器：Hugo（0.147.x）
 - 主题：[`cyjx007/hugo-theme-epistle`](https://github.com/cyjx007/hugo-theme-epistle)（`themes/epistle/` 是它的同步副本）
 - 托管：Cloudflare Pages（`main` 分支推送即构建）
@@ -25,18 +25,18 @@ hugo.toml         站点配置
 
 ## 网页写稿台（手机上写）
 
-打开 <https://blog.tanghuang.dpdns.org/admin/>，第一次只填两样东西：
+打开 <https://blog-efv.pages.dev/admin/>，第一次只填两样东西：
 
 1. **GitHub 令牌** —— 建议建一个 fine-grained token，只勾 `blog` 这一个仓库的
    `Contents: Read and write`：[新建 token](https://github.com/settings/personal-access-tokens/new)
-2. **图床口令** —— 已经默认填好（`img.tanghuang.dpdns.org`）
+2. **图床口令** —— 已经默认填好（图床临时用 `cloudflare-imgbed-auw.pages.dev`）
 
 两样都存在**这台设备的 localStorage** 里，不会进仓库、不会上传到别处。
 
 能做什么：
 
 - 像用 Word 一样写，工具栏有「大标题 / 小标题 / 粗 / 斜 / 列表 / 编号 / 引用 / 代码 / 链接 / 图片 / 分隔」
-- 图片直接上传到图床 `img.tanghuang.dpdns.org`，插入的是图床地址，不占仓库
+- 图片直接上传到图床 `cloudflare-imgbed-auw.pages.dev`，插入的是图床地址，不占仓库
 - 每 700ms 自动把草稿存到本机，刷新、切后台、iOS 把标签页杀了都不会丢；重开会有「继续上次没写完的」
 - 保存 = 直接提交到 GitHub，大约一分钟上线；不会自动刷新页面
 - 打开旧文章时，正文没动过就原样保留（不会把 Markdown 重排）

@@ -1,21 +1,21 @@
 /* 写信的桌子 —— 一个不需要懂 Markdown 的写稿页
    数据：GitHub Contents API（直接提交 .md）
-   图片：直传 img.tanghuang.dpdns.org
+   图片：直传 cloudflare-imgbed-auw.pages.dev
    待提交：改动先攒在本机队列里，攒够了一次 commit（只触发一次构建）
    草稿：localStorage，改动后 700ms 自动存，刷新不丢 */
 'use strict';
 
 /* 改了这个文件就把 BUILD 往后挪一位：页面会拿它跟线上的比，
    发现线上更新了就顶一条「有新版本」，点一下就能刷新（手机上没有 Ctrl+R）。 */
-const BUILD = '2026-11-02.5';
+const BUILD = '2026-11-16.1';
 
 const CFG = {
   owner: 'cyjx007',
   repo: 'blog',
   branch: 'main',
   dir: 'content/posts',
-  imgEndpoint: 'https://img.tanghuang.dpdns.org/upload',
-  siteBase: 'https://blog.tanghuang.dpdns.org/posts/',
+  imgEndpoint: 'https://cloudflare-imgbed-auw.pages.dev/upload',
+  siteBase: 'https://blog-efv.pages.dev/posts/',
 };
 
 const LS = { token: 'desk.token', img: 'desk.imgauth', draft: 'desk.draft', meta: 'desk.meta', queue: 'desk.queue' };

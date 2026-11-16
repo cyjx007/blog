@@ -321,7 +321,7 @@ NVIDIA 驱动问题
 
 目前我的桌面大概是这样：
 
-![Screenshot from 2026-09-04 16-03-33.png](https://img.tanghuang.dpdns.org/file/1788509064013_Screenshot_from_2026-09-04_16-03-33.png)
+![Screenshot from 2026-09-04 16-03-33.png](https://cloudflare-imgbed-auw.pages.dev/file/1788509064013_Screenshot_from_2026-09-04_16-03-33.png)
 
 它并不是某个官方推荐的“最佳配置”。
 

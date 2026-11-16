@@ -68,7 +68,7 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 
 Write-Host ""
 Write-Host "写好了：content/posts/$name.md" -ForegroundColor Green
-Write-Host "地址会是：https://blog.tanghuang.dpdns.org/posts/$name/"
+Write-Host "地址会是：https://blog-efv.pages.dev/posts/$name/"
 if ($Draft) { Write-Host "（draft: true，发之前要改成 false 才会出现在站上）" -ForegroundColor Yellow }
 Write-Host ""
 Write-Host "下一步：写完存盘 → 双击「发布.cmd」，或者跑 .\scripts\publish.ps1" -ForegroundColor DarkGray

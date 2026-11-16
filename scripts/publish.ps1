@@ -106,7 +106,7 @@ for ($i = 0; $i -lt 60; $i++) {
       $stage = $d.latest_stage.status
       if ($stage -eq 'success') {
         Write-Host ""
-        Write-Host "上线了 → https://blog.tanghuang.dpdns.org/" -ForegroundColor Green
+        Write-Host "上线了 → https://blog-efv.pages.dev/" -ForegroundColor Green
         exit 0
       }
       if ($stage -eq 'failure') {
