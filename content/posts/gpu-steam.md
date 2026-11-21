@@ -1,6 +1,6 @@
 ---
 title: "给笔记本装上独显和 Steam：三处「配置写了但没生效」"
-date: 2026-11-21T17:30:00+08:00
+date: 2026-11-21T11:00:00+08:00
 draft: false
 slug: "gpu-steam"
 tags: ["NixOS","NVIDIA","Steam","MangoHud","Wayland","游戏"]

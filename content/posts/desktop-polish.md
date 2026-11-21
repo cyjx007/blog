@@ -1,6 +1,6 @@
 ---
 title: "一句水印、一个 OCR 键、一张写全的快捷键表"
-date: 2026-11-21T17:00:00+08:00
+date: 2026-11-21T10:30:00+08:00
 draft: false
 slug: "desktop-polish"
 tags: ["NixOS","Umbriel","Noctalia","OCR","systemd","桌面"]

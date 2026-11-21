@@ -1,6 +1,6 @@
 ---
 title: "365 张壁纸，一套配色：壁纸流水线是怎么长出来的"
-date: 2026-11-21T18:00:00+08:00
+date: 2026-11-21T11:30:00+08:00
 draft: false
 slug: "wallpaper-pipeline"
 tags: ["NixOS","Noctalia","Wallhaven","壁纸","Material You","自动化"]

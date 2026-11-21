@@ -1,6 +1,6 @@
 ---
 title: "别急着给每台机器配代理：一次 ECONNRESET 和一次把浏览器搞挂的事故"
-date: 2026-11-21T16:30:00+08:00
+date: 2026-11-21T10:00:00+08:00
 draft: false
 slug: "proxy-accident"
 tags: ["网络","代理","OpenWrt","Firefox","排障","OpenCode"]
